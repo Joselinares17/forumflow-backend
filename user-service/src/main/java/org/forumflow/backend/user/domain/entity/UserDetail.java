@@ -1,22 +1,24 @@
 package org.forumflow.backend.user.domain.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -27,12 +29,12 @@ public class UserDetail {
     @Column(name = "user_detail_id")
     private Long id;
     @Column(nullable = false)
-    private String name;
+    private String firstname;
     @Column(nullable = false)
     private String lastname;
     @Column(nullable = false, unique = true)
     private String email;
-    @Column(nullable = false, unique = true, updatable = false)
+    @Column(nullable = true, unique = true, updatable = false)
     private String key;
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -40,4 +42,7 @@ public class UserDetail {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToOne(mappedBy = "userDetail", cascade = CascadeType.ALL)
+    private User user;
 }
