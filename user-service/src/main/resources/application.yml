@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/db_users
-    username: miusuario
-    password: mipassword
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10          # N�mero m�ximo de conexiones en el pool
@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create               # Opciones: validate | update | create | create-drop
+      ddl-auto: create-drop          # Opciones: validate | update | create | create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -23,3 +23,6 @@ spring:
 logging:
   level:
     org.hibernate.SQL: DEBUG         # Log detallado de consultas SQL (opcional)
+
+key:
+  secret_key: ${USER_SERVICE_KEY}
