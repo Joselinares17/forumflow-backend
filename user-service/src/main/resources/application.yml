@@ -24,5 +24,10 @@ logging:
   level:
     org.hibernate.SQL: DEBUG         # Log detallado de consultas SQL (opcional)
 
-key:
-  secret_key: ${USER_SERVICE_KEY}
+application:
+  security:
+    jwt:
+      secret-key: ${USER_SERVICE_KEY}
+      expiration: 86400000 # a day
+      refresh-token:
+        expiration: 604800000 # 7 days
