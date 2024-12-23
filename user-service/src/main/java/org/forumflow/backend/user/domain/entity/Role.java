@@ -14,7 +14,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import java.util.List;
 
 @Data
 @Builder
@@ -31,6 +31,6 @@ public class Role {
     @Enumerated(value = EnumType.STRING)
     private TypeRole typeRole;
 
-    @ManyToMany(mappedBy = "role")
-    private Set<User> user;
+    @ManyToMany(mappedBy = "roles")
+    private List<User> users;
 }

@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @Builder
@@ -48,7 +49,7 @@ public class User implements UserDetails {
     private UserDetail userDetail;
 
     @ManyToMany(
-            cascade = CascadeType.ALL,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE },
             fetch = FetchType.EAGER
     )
     @JoinTable(
@@ -56,11 +57,18 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> role;
+    private List<Role> roles;
+
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
+    private List<Token> tokens;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.role.stream()
+        return this.roles.stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_".concat(role.getTypeRole().name())))
                 .toList();
     }
