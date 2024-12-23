@@ -59,7 +59,7 @@ public class ApplicationConfig {
                         Role.builder().typeRole(TypeRole.MODERATOR).build(),
                         Role.builder().typeRole(TypeRole.ADMIN).build()
                 ));
-            };
+            }
         };
     }
 }

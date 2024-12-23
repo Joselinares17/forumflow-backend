@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,12 @@ import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
-    private static final String SECRET_KEY = "129h31ub2w81b28ey1b283u12be9u1n29734h91u2nw91su2n1972941b29un19usn29sun1928sn9128n9e182n9uns91u2n94unw9n19s2ns91iws1we13212s1w";
-
-//    public JwtService(@Value("${key.secret_key}") String SECRET_KEY) {
-//        this.SECRET_KEY = SECRET_KEY;
-//    }
+    @Value("${application.security.jwt.secret-key}")
+    private String SECRET_KEY;
+    @Value("${application.security.jwt.expiration}")
+    private long JWT_EXPIRATION;
+    @Value("${application.security.jwt.refresh-token.expiration}")
+    private long REFRESH_EXPIRATION;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -38,9 +40,18 @@ public class JwtService {
         return generateToken(new HashMap<>(), userDetails);
     }
 
-    public String generateToken(
+    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        return buildToken(extraClaims, userDetails, JWT_EXPIRATION);
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return buildToken(new HashMap<>(), userDetails, REFRESH_EXPIRATION);
+    }
+
+    private String buildToken(
             Map<String, Object> extraClaims,
-            UserDetails userDetails
+            UserDetails userDetails,
+            long expiration
     ) {
         Set<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -52,7 +63,7 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
