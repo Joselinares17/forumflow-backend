@@ -1,12 +1,9 @@
 package org.forumflow.backend.user.infraestructure.api.auth;
 
-import jakarta.annotation.PostConstruct;
 import org.forumflow.backend.user.application.business.AuthenticationBusiness;
 import org.forumflow.backend.user.infraestructure.model.request.AuthenticationRequest;
 import org.forumflow.backend.user.infraestructure.model.request.RegisterRequest;
-import org.forumflow.backend.user.infraestructure.model.response.ApiResponse;
 import org.forumflow.backend.user.infraestructure.model.response.AuthenticationResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

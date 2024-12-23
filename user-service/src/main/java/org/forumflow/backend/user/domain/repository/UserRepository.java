@@ -1,10 +1,7 @@
 package org.forumflow.backend.user.domain.repository;
 
-import io.lettuce.core.dynamic.annotation.Param;
 import org.forumflow.backend.user.domain.entity.User;
-import org.forumflow.backend.user.infraestructure.model.dto.UserDto;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
