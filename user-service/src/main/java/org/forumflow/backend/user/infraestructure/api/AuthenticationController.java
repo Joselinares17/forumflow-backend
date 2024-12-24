@@ -1,4 +1,4 @@
-package org.forumflow.backend.user.infraestructure.api.auth;
+package org.forumflow.backend.user.infraestructure.api;
 
 import org.forumflow.backend.user.application.business.AuthenticationBusiness;
 import org.forumflow.backend.user.infraestructure.model.request.AuthenticationRequest;
