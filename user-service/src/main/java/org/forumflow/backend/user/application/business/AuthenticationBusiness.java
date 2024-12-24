@@ -1,8 +1,5 @@
 package org.forumflow.backend.user.application.business;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.forumflow.backend.user.application.service.IAuthenticateService;
 import org.forumflow.backend.user.domain.entity.Role;
 import org.forumflow.backend.user.domain.entity.Token;
@@ -17,18 +14,15 @@ import org.forumflow.backend.user.infraestructure.model.request.AuthenticationRe
 import org.forumflow.backend.user.infraestructure.model.request.RegisterRequest;
 import org.forumflow.backend.user.infraestructure.model.response.AuthenticationResponse;
 import org.forumflow.backend.user.infraestructure.security.JwtService;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AuthenticationBusiness implements IAuthenticateService {
