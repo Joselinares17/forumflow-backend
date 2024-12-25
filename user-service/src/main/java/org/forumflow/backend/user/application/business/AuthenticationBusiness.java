@@ -52,16 +52,16 @@ public class AuthenticationBusiness implements IAuthenticateService {
         roles.add(userRole);
 
         UserDetail userDetail = UserDetail.builder()
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
-                .email(request.getEmail())
+                .firstname(request.firstname())
+                .lastname(request.lastname())
+                .email(request.email())
                 .createdAt(LocalDateTime.now())
                 .build();
 
         User user = User.builder()
                 .userDetail(userDetail)
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .username(request.username())
+                .password(passwordEncoder.encode(request.password()))
                 .roles(roles)
                 .build();
         User savedUser = userRepository.save(user);
@@ -79,11 +79,11 @@ public class AuthenticationBusiness implements IAuthenticateService {
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
+                        request.username(),
+                        request.password()
                 )
         );
-        User user = userRepository.findByUsername(request.getUsername())
+        User user = userRepository.findByUsername(request.username())
                 .orElseThrow();
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
