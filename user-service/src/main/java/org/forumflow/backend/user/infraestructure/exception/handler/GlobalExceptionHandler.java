@@ -17,13 +17,16 @@ import org.forumflow.backend.user.infraestructure.model.response.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,8 +35,7 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
@@ -41,22 +43,38 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
         log.error("Validation errors: {}", errors);
-        return new ErrorResponse(
+        ErrorResponse errorResponse = new ErrorResponse(
                 "VALIDATION_ERROR",
-                errors.toString(),
-                HttpStatus.BAD_REQUEST.value()
+                errors,
+                LocalDateTime.now()
         );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NoHandlerFoundException ex) {
+        log.error("Not found error: {}", ex.getMessage());
+        Map<String, String> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                "NOT_FOUND",
+                body,
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handleAuthenticationException(AuthenticationException ex) {
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
         log.error("Authentication error: {}", ex.getMessage());
-        return new ErrorResponse(
+        Map<String, String> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
                 "AUTHENTICATION_ERROR",
-                ex.getMessage(),
-                HttpStatus.UNAUTHORIZED.value()
+                body,
+                LocalDateTime.now()
         );
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler({
@@ -64,39 +82,46 @@ public class GlobalExceptionHandler {
             InvalidTokenException.class,
             ExpiredSessionException.class
     })
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handleSpecificAuthErrors(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleSpecificAuthErrors(Exception ex) {
         log.error("Specific authentication error: {}", ex.getMessage());
-        return new ErrorResponse(
+        Map<String, String> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
                 "AUTH_ERROR",
-                ex.getMessage(),
-                HttpStatus.UNAUTHORIZED.value()
+                body,
+                LocalDateTime.now()
         );
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler({
             UserNotFoundException.class,
+            UsernameNotFoundException.class,
             InvalidUserInputException.class
     })
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleUserErrors(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleUserErrors(Exception ex) {
         log.error("User error: {}", ex.getMessage());
-        return new ErrorResponse(
+        Map<String, String> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
                 "USER_ERROR",
-                ex.getMessage(),
-                HttpStatus.BAD_REQUEST.value()
+                body,
+                LocalDateTime.now()
         );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleUserConflict(UserAlreadyExistsException ex) {
+    public ResponseEntity<ErrorResponse> handleUserConflict(UserAlreadyExistsException ex) {
         log.error("User conflict: {}", ex.getMessage());
-        return new ErrorResponse(
+        Map<String, String> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
                 "USER_CONFLICT",
-                ex.getMessage(),
-                HttpStatus.CONFLICT.value()
+                body,
+                LocalDateTime.now()
         );
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({
@@ -104,14 +129,16 @@ public class GlobalExceptionHandler {
             InsufficientPermissionsException.class,
             UnauthorizedActionException.class
     })
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handlePermissionErrors(Exception ex) {
+    public ResponseEntity<ErrorResponse> handlePermissionErrors(Exception ex) {
         log.error("Permission error: {}", ex.getMessage());
-        return new ErrorResponse(
+        Map<String, String> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
                 "PERMISSION_ERROR",
-                ex.getMessage(),
-                HttpStatus.FORBIDDEN.value()
+                body,
+                LocalDateTime.now()
         );
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler({
@@ -120,24 +147,28 @@ public class GlobalExceptionHandler {
             RoleAssignmentException.class,
             RoleModificationNotAllowedException.class
     })
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleRoleErrors(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleRoleErrors(Exception ex) {
         log.error("Role error: {}", ex.getMessage());
-        return new ErrorResponse(
+        Map<String, String> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
                 "ROLE_ERROR",
-                ex.getMessage(),
-                HttpStatus.BAD_REQUEST.value()
+                body,
+                LocalDateTime.now()
         );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleGenericError(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleGenericError(Exception ex) {
         log.error("Unexpected error: ", ex);
-        return new ErrorResponse(
+        Map<String, String> body = new HashMap<>();
+        body.put("message", "An unexpected error occurred");
+        ErrorResponse errorResponse = new ErrorResponse(
                 "INTERNAL_SERVER_ERROR",
-                "An unexpected error occurred",
-                HttpStatus.INTERNAL_SERVER_ERROR.value()
+                body,
+                LocalDateTime.now()
         );
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
