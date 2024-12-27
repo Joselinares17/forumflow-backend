@@ -1,5 +1,6 @@
 package org.forumflow.backend.user.infraestructure.api;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.forumflow.backend.user.application.business.AuthenticationBusiness;
 import org.forumflow.backend.user.infraestructure.model.request.AuthenticationRequest;
 import org.forumflow.backend.user.infraestructure.model.request.RegisterRequest;
@@ -9,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,6 +31,11 @@ public class AuthenticationController {
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@Validated @RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(authenticationBusiness.authenticate(request));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<AuthenticationResponse> refreshToken(HttpServletRequest request) {
+        return ResponseEntity.ok(authenticationBusiness.refreshToken(request));
     }
 
     @GetMapping("/hello")

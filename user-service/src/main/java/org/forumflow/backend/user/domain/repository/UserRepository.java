@@ -2,6 +2,7 @@ package org.forumflow.backend.user.domain.repository;
 
 import org.forumflow.backend.user.domain.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -13,4 +14,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 //    Optional<UserDto> findUserByEmail(@Param("email") String email);
 
     Optional<User> findByUsername(String username);
+
+    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM User u WHERE u.userDetail.email = :email")
+    boolean existsByEmail(String email);
 }

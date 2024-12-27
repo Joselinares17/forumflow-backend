@@ -39,6 +39,14 @@ public class User implements UserDetails {
     private String username;
     @Column(nullable = false, unique = true)
     private String password;
+    @Column(nullable = false)
+    private boolean accountNonExpired;
+    @Column(nullable = false)
+    private boolean accountNonLocked;
+    @Column(nullable = false)
+    private boolean credentialsNonExpired;
+    @Column(nullable = false)
+    private boolean enabled;
 
     @OneToOne(
             cascade = CascadeType.ALL,
@@ -85,21 +93,21 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return this.accountNonExpired;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return this.accountNonLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return this.credentialsNonExpired;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.enabled;
     }
 }

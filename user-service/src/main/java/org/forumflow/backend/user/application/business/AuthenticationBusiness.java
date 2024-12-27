@@ -1,5 +1,6 @@
 package org.forumflow.backend.user.application.business;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.forumflow.backend.user.application.service.IAuthenticateService;
 import org.forumflow.backend.user.domain.entity.Role;
 import org.forumflow.backend.user.domain.entity.Token;
@@ -10,12 +11,19 @@ import org.forumflow.backend.user.domain.entity.UserDetail;
 import org.forumflow.backend.user.domain.repository.RoleRepository;
 import org.forumflow.backend.user.domain.repository.TokenRepository;
 import org.forumflow.backend.user.domain.repository.UserRepository;
+import org.forumflow.backend.user.infraestructure.exception.custom.authentication.InvalidTokenException;
+import org.forumflow.backend.user.infraestructure.exception.custom.security.RoleNotFoundException;
+import org.forumflow.backend.user.infraestructure.exception.custom.security.UnauthorizedActionException;
+import org.forumflow.backend.user.infraestructure.exception.custom.user.UserAlreadyExistsException;
+import org.forumflow.backend.user.infraestructure.exception.custom.user.UserNotFoundException;
 import org.forumflow.backend.user.infraestructure.model.request.AuthenticationRequest;
 import org.forumflow.backend.user.infraestructure.model.request.RegisterRequest;
 import org.forumflow.backend.user.infraestructure.model.response.AuthenticationResponse;
 import org.forumflow.backend.user.infraestructure.security.JwtService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +54,11 @@ public class AuthenticationBusiness implements IAuthenticateService {
     @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
         Role userRole = roleRepository.findByTypeRole(TypeRole.USER)
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(RoleNotFoundException::new);
+
+        if (userRepository.existsByEmail(request.email())) {
+            throw new UserAlreadyExistsException("email is already in use");
+        }
 
         List<Role> roles = new ArrayList<>();
         roles.add(userRole);
@@ -62,8 +74,13 @@ public class AuthenticationBusiness implements IAuthenticateService {
                 .userDetail(userDetail)
                 .username(request.username())
                 .password(passwordEncoder.encode(request.password()))
+                .accountNonExpired(true)
+                .accountNonLocked(true)
+                .credentialsNonExpired(true)
+                .enabled(true)
                 .roles(roles)
                 .build();
+
         User savedUser = userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
@@ -84,7 +101,7 @@ public class AuthenticationBusiness implements IAuthenticateService {
                 )
         );
         User user = userRepository.findByUsername(request.username())
-                .orElseThrow();
+                .orElseThrow(UserNotFoundException::new);
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
@@ -108,12 +125,48 @@ public class AuthenticationBusiness implements IAuthenticateService {
 
     private void revokeAllUserTokens(User user) {
         List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
-        if (validUserTokens.isEmpty())
-            return;
+        if (validUserTokens.isEmpty()) {
+            throw new InvalidTokenException("Invalid tokens by user");
+        }
         validUserTokens.forEach(token -> {
             token.setExpired(true);
             token.setRevoked(true);
         });
         tokenRepository.saveAll(validUserTokens);
+    }
+
+    public AuthenticationResponse refreshToken(HttpServletRequest request) {
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        if(request.getUserPrincipal() == null){
+            throw new UnauthorizedActionException("Unauthorized action");
+        }
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new InvalidTokenException("Invalid token by headers");
+        }
+
+        String refreshToken = authHeader.substring(7);
+        String username = jwtService.extractUsername(refreshToken);
+
+        if (username == null) {
+            throw new InvalidTokenException("Invalid token by username");
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (!jwtService.isTokenValid(refreshToken, user)) {
+            throw new InvalidTokenException("Invalid token");
+        }
+
+        String accessToken = jwtService.generateToken(user);
+        revokeAllUserTokens(user);
+        saveUserToken(user, accessToken);
+
+        return AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(jwtService.generateRefreshToken(user)) // Genera un nuevo refreshToken
+                .build();
     }
 }
