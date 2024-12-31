@@ -16,6 +16,7 @@ import org.forumflow.backend.user.infraestructure.exception.custom.user.UserNotF
 import org.forumflow.backend.user.infraestructure.model.response.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -153,6 +154,19 @@ public class GlobalExceptionHandler {
         body.put("message", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse(
                 "ROLE_ERROR",
+                body,
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        log.error("Illegal argument error: {}", ex.getMessage());
+        Map<String, String> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                "SQL_ERROR",
                 body,
                 LocalDateTime.now()
         );
