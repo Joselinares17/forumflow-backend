@@ -1,6 +1,10 @@
 package org.forumflow.backend.user.infraestructure.model.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record UserResponse(
-        //Agregar más atributos
+        String username,
+        UserDetailResponse userDetailResponse
 ) {
 }
