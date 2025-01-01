@@ -13,4 +13,5 @@ public interface IUserService {
     UserDetailResponse updateUserInfo(UpdateInfoRequest request, User user);
     UserResponse getUserInfoByUsername(String username);
     Page<UserResponse> getAllUsersWithDetails(Pageable pageable);
+    void deleteUser(User user);
 }

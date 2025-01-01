@@ -6,10 +6,12 @@ import org.forumflow.backend.user.infraestructure.model.request.ChangePasswordRe
 import org.forumflow.backend.user.infraestructure.model.request.UpdateInfoRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,5 +55,12 @@ public class UserController {
     @Secured("ROLE_USER")
     public ResponseEntity<?> getAllUsers(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(userBusiness.getAllUsersWithDetails(pageable));
+    }
+
+    @DeleteMapping
+    @Secured("ROLE_USER")
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal User user) {
+        userBusiness.deleteUser(user);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 }
