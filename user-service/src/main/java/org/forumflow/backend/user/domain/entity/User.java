@@ -50,13 +50,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean enabled;
 
-    @Column(nullable = false)
     private LocalDateTime suspensionStart;
-    @Column(nullable = false)
     private Duration suspensionDuration;
-    @Column(nullable = false)
     private LocalDateTime banStart;
-    @Column(nullable = false)
     private Duration banDuration;
 
     @OneToOne(
