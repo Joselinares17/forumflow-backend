@@ -23,11 +23,13 @@ public class SecurityConfiguration {
             "/api/v1/auth/**"
     };
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AccountStatusFilter accountStatusFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
 
-    public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter, AuthenticationProvider authenticationProvider, LogoutHandler logoutHandler) {
+    public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter, AccountStatusFilter accountStatusFilter, AuthenticationProvider authenticationProvider, LogoutHandler logoutHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.accountStatusFilter = accountStatusFilter;
         this.authenticationProvider = authenticationProvider;
         this.logoutHandler = logoutHandler;
     }
@@ -46,6 +48,7 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(accountStatusFilter, JwtAuthenticationFilter.class)
                 .logout(logout ->
                         logout.logoutUrl("api/v1/auth/logout")
                                 .addLogoutHandler(logoutHandler)

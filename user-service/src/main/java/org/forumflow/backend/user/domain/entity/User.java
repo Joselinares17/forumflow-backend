@@ -21,6 +21,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -47,6 +49,15 @@ public class User implements UserDetails {
     private boolean credentialsNonExpired;
     @Column(nullable = false)
     private boolean enabled;
+
+    @Column(nullable = false)
+    private LocalDateTime suspensionStart;
+    @Column(nullable = false)
+    private Duration suspensionDuration;
+    @Column(nullable = false)
+    private LocalDateTime banStart;
+    @Column(nullable = false)
+    private Duration banDuration;
 
     @OneToOne(
             cascade = CascadeType.ALL,
@@ -98,6 +109,9 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
+        if (this.isCurrentlySuspended()) {
+            return false;
+        }
         return this.accountNonLocked;
     }
 
@@ -108,6 +122,19 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
+        if (this.isCurrentlyBanned()) {
+            return false;
+        }
         return this.enabled;
+    }
+
+    public boolean isCurrentlySuspended() {
+        return this.suspensionStart != null && this.suspensionDuration != null
+                && this.suspensionStart.plus(this.suspensionDuration).isAfter(LocalDateTime.now());
+    }
+
+    public boolean isCurrentlyBanned() {
+        return this.banStart != null && this.banDuration != null
+                && this.banStart.plus(this.banDuration).isAfter(LocalDateTime.now());
     }
 }
