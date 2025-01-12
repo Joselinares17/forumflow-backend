@@ -1,9 +1,11 @@
 package org.forumflow.backend.user.infraestructure.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.forumflow.backend.user.infraestructure.model.request.AuthenticationRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,9 +17,11 @@ import java.io.IOException;
 @Component
 public class AccountStatusFilter extends OncePerRequestFilter {
     private final UserService userService;
+    private final ObjectMapper objectMapper;
 
-    public AccountStatusFilter(UserService userService) {
+    public AccountStatusFilter(UserService userService, ObjectMapper objectMapper) {
         this.userService = userService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -25,22 +29,26 @@ public class AccountStatusFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        //TODO: Implementar lógica para verificar estado de cuenta desde caché.
+        if (!request.getServletPath().equals("api/v1/auth/authenticate")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-        if (authentication != null) {
-            UserDetails principal = (UserDetails) authentication.getPrincipal();
-            String username = principal.getUsername();
+        if (request.getMethod().equalsIgnoreCase("POST")) {
+            AuthenticationRequest authenticationRequest = objectMapper.readValue(request.getInputStream(), AuthenticationRequest.class);
+            String username = authenticationRequest.username();
 
-            if (userService.isCurrentlySuspended(username)) {
-                response.setStatus(403);
-                response.getWriter().write("Account suspended");
+            if (username == null || username.isEmpty()) {
+                throw new RuntimeException("Username is empty.");
+            }
+
+            if (!userService.existsUserByUsername(username)) {
+                filterChain.doFilter(request, response);
                 return;
             }
-            if (userService.isCurrentlyBanned(username)) {
-                response.setStatus(403);
-                response.getWriter().write("Account banned");
-                return;
-            }
+
+            userService.loadUserChecked(username, request);
         }
 
         filterChain.doFilter(request, response);

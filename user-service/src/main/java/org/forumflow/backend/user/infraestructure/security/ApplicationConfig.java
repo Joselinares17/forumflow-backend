@@ -2,8 +2,9 @@ package org.forumflow.backend.user.infraestructure.security;
 
 import org.forumflow.backend.user.domain.entity.Role;
 import org.forumflow.backend.user.domain.entity.TypeRole;
+import org.forumflow.backend.user.domain.entity.User;
+import org.forumflow.backend.user.domain.entity.UserDetail;
 import org.forumflow.backend.user.domain.repository.RoleRepository;
-import org.forumflow.backend.user.domain.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +13,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -20,16 +20,16 @@ import java.util.List;
 
 @Configuration
 public class ApplicationConfig {
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public ApplicationConfig(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public ApplicationConfig(UserService userService) {
+        this.userService = userService;
     }
+
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return this.userService;
     }
 
     @Bean
@@ -60,6 +60,20 @@ public class ApplicationConfig {
                         Role.builder().typeRole(TypeRole.ADMIN).build()
                 ));
             }
+            User admin = User.builder()
+                    .userDetail(UserDetail.builder()
+                            .firstname("Pepe")
+                            .lastname("Perez")
+                            .email("elpapu@gmail.com")
+                            .build()
+                    )
+                    .username("pepe-admin")
+                    .password(passwordEncoder().encode("123456789"))
+                    .build();
+
+            //TODO: Agregarle la logica de asignacion de administrador (No correrá sin eso).
+
+            //userRepository.save(admin);
         };
     }
 }
