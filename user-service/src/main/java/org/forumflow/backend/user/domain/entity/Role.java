@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+//TODO: retirar la anotacion Data de todos los entities
 @Data
 @Builder
 @AllArgsConstructor
@@ -24,9 +26,17 @@ import java.util.List;
 @Table(name = "roles")
 public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "role_seq_gen"
+    )
+    @SequenceGenerator(
+            name = "role_seq_gen",
+            sequenceName = "role_sequence",
+            allocationSize = 1
+    )
     @Column(name = "role_id")
-    private Long id;
+    private int id;
     @Column(nullable = false, unique = true)
     @Enumerated(value = EnumType.STRING)
     private TypeRole typeRole;

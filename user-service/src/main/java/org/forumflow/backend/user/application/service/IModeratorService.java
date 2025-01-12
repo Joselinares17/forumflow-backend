@@ -1,19 +1,20 @@
 package org.forumflow.backend.user.application.service;
 
+import org.forumflow.backend.user.infraestructure.model.request.SuspendRequest;
+import org.forumflow.backend.user.infraestructure.model.response.ModerationResultResponse;
+
 import java.time.Duration;
 
 public interface IModeratorService {
-    boolean suspendUserTemporarily(Long id, Duration duration);
+    ModerationResultResponse suspendUserTemporarily(Long id, Duration duration);
 
-    boolean suspendUserPermanently(Long id);
+    ModerationResultResponse suspendUserPermanently(Long id);
 
-    boolean unsuspendUser(Long id);
+    ModerationResultResponse unsuspendUser(Long id);
 
-    boolean desactivateUser(Long id);
+    ModerationResultResponse banUserTemporarily(Long id, Duration duration);
 
-    boolean reactivateUser(Long id);
+    ModerationResultResponse banUserPermanently(Long id);
 
-    boolean banUserTemporary(Long id, Duration duration);
-
-    boolean banUserPermanently(Long id);
+    ModerationResultResponse unbanUser(Long id);
 }

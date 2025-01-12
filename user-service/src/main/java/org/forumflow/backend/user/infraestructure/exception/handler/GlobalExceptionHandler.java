@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -173,11 +174,24 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<ErrorResponse> handleDateTimeParseException(DateTimeParseException ex) {
+        log.error("Invalid duration format: {}", ex.getMessage());
+        Map<String, String> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                "INVALID_DURATION_FORMAT",
+                body,
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericError(Exception ex) {
         log.error("Unexpected error: ", ex);
         Map<String, String> body = new HashMap<>();
-        body.put("message", "An unexpected error occurred");
+        body.put("message", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse(
                 "INTERNAL_SERVER_ERROR",
                 body,
