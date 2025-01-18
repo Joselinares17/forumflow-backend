@@ -1,4 +1,4 @@
-package org.forumflow.backend.user.infraestructure.security;
+package org.forumflow.backend.user.infraestructure.security.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

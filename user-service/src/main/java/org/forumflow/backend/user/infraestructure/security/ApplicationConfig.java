@@ -5,6 +5,7 @@ import org.forumflow.backend.user.domain.entity.TypeRole;
 import org.forumflow.backend.user.domain.entity.User;
 import org.forumflow.backend.user.domain.entity.UserDetail;
 import org.forumflow.backend.user.domain.repository.RoleRepository;
+import org.forumflow.backend.user.infraestructure.security.service.UserService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package org.forumflow.backend.user.infraestructure.security;
+package org.forumflow.backend.user.infraestructure.security.service;
 
 import org.forumflow.backend.user.domain.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;

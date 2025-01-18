@@ -1,6 +1,8 @@
 package org.forumflow.backend.user.infraestructure.security;
 
 import org.forumflow.backend.user.domain.entity.TypeRole;
+import org.forumflow.backend.user.infraestructure.security.filter.AccountStatusFilter;
+import org.forumflow.backend.user.infraestructure.security.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;

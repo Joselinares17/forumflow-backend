@@ -19,7 +19,7 @@ import org.forumflow.backend.user.infraestructure.exception.custom.user.UserNotF
 import org.forumflow.backend.user.infraestructure.model.request.AuthenticationRequest;
 import org.forumflow.backend.user.infraestructure.model.request.RegisterRequest;
 import org.forumflow.backend.user.infraestructure.model.response.AuthenticationResponse;
-import org.forumflow.backend.user.infraestructure.security.JwtService;
+import org.forumflow.backend.user.infraestructure.security.service.JwtService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

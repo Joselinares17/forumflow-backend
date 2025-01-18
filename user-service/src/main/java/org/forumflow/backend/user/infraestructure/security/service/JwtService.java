@@ -1,4 +1,4 @@
-package org.forumflow.backend.user.infraestructure.security;
+package org.forumflow.backend.user.infraestructure.security.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
