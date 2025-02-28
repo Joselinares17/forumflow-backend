@@ -20,9 +20,14 @@ spring:
         format_sql: true             # Formatear las consultas SQL para facilitar la lectura
         show_sql: true               # Mostrar las consultas SQL en el log
 
-  redis:
-    host: localhost
-    port: 6379
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  jackson:
+    serialization:
+      write-dates-with-zone-id: true
 
 logging:
   level:
