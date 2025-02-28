@@ -1,12 +1,12 @@
 package org.forumflow.backend.user.infraestructure.security.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.forumflow.backend.user.infraestructure.model.request.AuthenticationRequest;
-import org.forumflow.backend.user.infraestructure.security.service.UserService;
+import org.forumflow.backend.user.infraestructure.security.service.IUserService;
+import org.forumflow.backend.user.infraestructure.security.service.JwtService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -14,12 +14,12 @@ import java.io.IOException;
 
 @Component
 public class AccountStatusFilter extends OncePerRequestFilter {
-    private final UserService userService;
-    private final ObjectMapper objectMapper;
+    private final IUserService userService;
+    private final JwtService jwtService;
 
-    public AccountStatusFilter(UserService userService, ObjectMapper objectMapper) {
+    public AccountStatusFilter(@Qualifier("cache") IUserService userService, JwtService jwtService) {
         this.userService = userService;
-        this.objectMapper = objectMapper;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -27,27 +27,40 @@ public class AccountStatusFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-        //TODO: Implementar lógica para verificar estado de cuenta desde caché.
-        if (!request.getServletPath().equals("api/v1/auth/authenticate")) {
+
+        //TODO: Implementar algo xd
+        /*
+        if (request.getServletPath().equals("/api/v1/auth/register") ||
+                request.getServletPath().equals("/api/v1/auth/login")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        if (request.getMethod().equalsIgnoreCase("POST")) {
-            AuthenticationRequest authenticationRequest = objectMapper.readValue(request.getInputStream(), AuthenticationRequest.class);
-            String username = authenticationRequest.username();
+        final String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            if (username == null || username.isEmpty()) {
-                throw new RuntimeException("Username is empty.");
-            }
+        final String jwt = authHeader.substring(7);
+        final String username = jwtService.extractUsername(jwt);
 
-            if (!userService.existsUserByUsername(username)) {
-                filterChain.doFilter(request, response);
+        if (username == null || username.isEmpty()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (userService.existsUserByUsername(username)) {
+            try {
+                userService.saveUserChecked(username);
+            } catch (RuntimeException e) {
+                // Manejar excepciones de cuenta suspendida o baneada
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.getWriter().write("Account status issue: " + e.getMessage());
                 return;
             }
-
-            userService.loadUserChecked(username, request);
         }
+        */
 
         filterChain.doFilter(request, response);
     }

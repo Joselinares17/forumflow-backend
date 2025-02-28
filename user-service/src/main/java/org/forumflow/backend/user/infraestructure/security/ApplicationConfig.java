@@ -27,7 +27,6 @@ public class ApplicationConfig {
         this.userService = userService;
     }
 
-
     @Bean
     public UserDetailsService userDetailsService() {
         return this.userService;
