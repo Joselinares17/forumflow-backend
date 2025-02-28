@@ -9,13 +9,9 @@ import org.forumflow.backend.user.domain.repository.UserRepository;
 import org.forumflow.backend.user.infraestructure.exception.custom.security.DatabaseOperationException;
 import org.forumflow.backend.user.infraestructure.exception.custom.security.UnauthorizedActionException;
 import org.forumflow.backend.user.infraestructure.exception.custom.user.UserNotFoundException;
-import org.forumflow.backend.user.infraestructure.model.request.SuspendRequest;
 import org.forumflow.backend.user.infraestructure.model.response.ModerationResultResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -122,13 +118,11 @@ public class ModeratorBusiness implements IModeratorService {
             userDb.setSuspensionStart(LocalDateTime.now());
             userDb.setSuspensionDuration(duration);
             userDb.setAccountNonLocked(false);
-            updateSecurityContext(userDb);
             tokenRepository.deleteAllByUserId(id);
         } else {
             userDb.setSuspensionStart(null);
             userDb.setSuspensionDuration(null);
             userDb.setAccountNonLocked(true);
-            updateSecurityContext(userDb);
         }
 
         return saveUserAndReturnResult(userDb, id, suspend ? "Suspend" : "Unsuspend", duration);
@@ -146,29 +140,13 @@ public class ModeratorBusiness implements IModeratorService {
             userDb.setBanStart(LocalDateTime.now());
             userDb.setBanDuration(duration);
             userDb.setEnabled(false);
-            updateSecurityContext(userDb);
 
         } else {
             userDb.setBanStart(null);
             userDb.setBanDuration(null);
             userDb.setEnabled(true);
-            updateSecurityContext(userDb);
         }
 
         return saveUserAndReturnResult(userDb, id, ban ? "Ban" : "Unban", duration);
-    }
-
-    //TODO: Abstraer este metodo con el que se encuentra en UserService
-    private void updateSecurityContext(User user) {
-        Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
-        if (currentAuth != null) {
-            SecurityContextHolder.getContext().setAuthentication(
-                    new UsernamePasswordAuthenticationToken(
-                            user,
-                            currentAuth.getCredentials(),
-                            user.getAuthorities()
-                    )
-            );
-        }
     }
 }

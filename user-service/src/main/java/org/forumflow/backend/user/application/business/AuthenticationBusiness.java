@@ -20,6 +20,7 @@ import org.forumflow.backend.user.infraestructure.model.request.AuthenticationRe
 import org.forumflow.backend.user.infraestructure.model.request.RegisterRequest;
 import org.forumflow.backend.user.infraestructure.model.response.AuthenticationResponse;
 import org.forumflow.backend.user.infraestructure.security.service.JwtService;
+import org.forumflow.backend.user.infraestructure.security.service.RedisService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,14 +40,16 @@ public class AuthenticationBusiness implements IAuthenticateService {
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RedisService redisService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationBusiness(UserRepository userRepository, RoleRepository roleRepository, TokenRepository tokenRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
+    public AuthenticationBusiness(UserRepository userRepository, RoleRepository roleRepository, TokenRepository tokenRepository, PasswordEncoder passwordEncoder, JwtService jwtService, RedisService redisService, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.redisService = redisService;
         this.authenticationManager = authenticationManager;
     }
 
@@ -85,6 +88,7 @@ public class AuthenticationBusiness implements IAuthenticateService {
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         saveUserToken(savedUser, jwtToken);
+        redisService.save(request.username(), savedUser);
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
@@ -104,7 +108,8 @@ public class AuthenticationBusiness implements IAuthenticateService {
                 .orElseThrow(UserNotFoundException::new);
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
-        revokeAllUserTokens(user);
+        //TODO: Realizar una verificación para evitar el método en caso no existan tokens para borrar.
+        //revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
