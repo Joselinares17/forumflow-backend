@@ -2,6 +2,7 @@ package org.forumflow.backend.user.domain.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -18,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.forumflow.backend.user.infraestructure.serialization.DurationConverter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,8 +55,11 @@ public class User implements UserDetails {
     private boolean enabled;
 
     private LocalDateTime suspensionStart;
-    private Duration suspensionDuration;
     private LocalDateTime banStart;
+
+    @Convert(converter = DurationConverter.class)
+    private Duration suspensionDuration;
+    @Convert(converter = DurationConverter.class)
     private Duration banDuration;
 
     @OneToOne(
