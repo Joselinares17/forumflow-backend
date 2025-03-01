@@ -1,8 +1,11 @@
 package org.forumflow.backend.user.infraestructure.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.forumflow.backend.user.domain.entity.User;
 import org.forumflow.backend.user.infraestructure.serialization.UserRedisMixin;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -21,11 +24,32 @@ import java.time.Duration;
 @EnableCaching
 public class RedisConfig {
     private final RedisConnectionFactory redisConnectionFactory;
-    private final ObjectMapper objectMapper;
 
-    public RedisConfig(RedisConnectionFactory redisConnectionFactory, ObjectMapper objectMapper) {
+    public RedisConfig(RedisConnectionFactory redisConnectionFactory) {
         this.redisConnectionFactory = redisConnectionFactory;
-        this.objectMapper = objectMapper;
+    }
+
+    @Bean("redisObjectMapper")
+    public ObjectMapper redisObjectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return objectMapper;
+    }
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(@Qualifier("redisObjectMapper") ObjectMapper redisObjectMapper) {
+        redisObjectMapper.addMixIn(User.class, UserRedisMixin.class);
+
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setDefaultSerializer(redisSerializer(redisObjectMapper));
+        return template;
+    }
+
+    @Bean
+    public RedisSerializer<Object> redisSerializer(@Qualifier("redisObjectMapper") ObjectMapper redisObjectMapper) {
+        return new GenericJackson2JsonRedisSerializer(redisObjectMapper);
     }
 
     @Bean
@@ -35,22 +59,9 @@ public class RedisConfig {
                         .entryTtl(Duration.ofMinutes(30))
                         .disableCachingNullValues()
                         .serializeValuesWith(RedisSerializationContext.SerializationPair
-                                .fromSerializer(redisSerializer(objectMapper))))
+                                .fromSerializer(redisSerializer(redisObjectMapper()))
+                        )
+                )
                 .build();
-    }
-
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate(ObjectMapper objectMapper) {
-        objectMapper.addMixIn(User.class, UserRedisMixin.class);
-
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
-        template.setDefaultSerializer(redisSerializer(objectMapper));
-        return template;
-    }
-
-    @Bean
-    public RedisSerializer<Object> redisSerializer(ObjectMapper objectMapper) {
-        return new GenericJackson2JsonRedisSerializer(objectMapper);
     }
 }

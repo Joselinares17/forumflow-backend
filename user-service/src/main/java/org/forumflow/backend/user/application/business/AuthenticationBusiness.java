@@ -171,7 +171,7 @@ public class AuthenticationBusiness implements IAuthenticateService {
 
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(jwtService.generateRefreshToken(user)) // Genera un nuevo refreshToken
+                .refreshToken(jwtService.generateRefreshToken(user))
                 .build();
     }
 }

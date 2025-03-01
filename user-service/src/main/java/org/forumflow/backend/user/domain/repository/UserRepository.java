@@ -23,6 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u.username as username, u.userDetail as userDetail FROM User u JOIN u.userDetail d")
     Page<UserProjection> findAllUsersWithDetails(Pageable pageable);
 
+    //TODO: Revisar si se puede aplicar projections al resto de métodos para optimizar las querys desde el código
     @Query("SELECT u FROM User u WHERE u.accountNonLocked = false AND u.suspensionStart IS NOT NULL AND u.suspensionDuration IS NOT NULL")
     List<User> findAllSuspendedUsers();
 
