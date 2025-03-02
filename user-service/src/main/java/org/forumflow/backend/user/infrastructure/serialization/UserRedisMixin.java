@@ -2,6 +2,7 @@ package org.forumflow.backend.user.infrastructure.serialization;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.forumflow.backend.user.domain.entity.Role;
 import org.forumflow.backend.user.domain.entity.Token;
 import org.forumflow.backend.user.domain.entity.UserDetail;
 
@@ -14,4 +15,7 @@ public interface UserRedisMixin {
 
     @JsonIgnore
     List<Token> getTokens();
+
+    @JsonIgnore
+    List<Role> getRoles();
 }
