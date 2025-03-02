@@ -15,6 +15,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Builder
 @Getter
@@ -28,9 +29,9 @@ public class UserDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_detail_id")
     private Long id;
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private String firstname;
-    @Column(nullable = false)
+    @Column(nullable = false , updatable = false)
     private String lastname;
     @Column(nullable = false, unique = true)
     private String email;
@@ -42,4 +43,16 @@ public class UserDetail {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        UserDetail that = (UserDetail) o;
+        return Objects.equals(firstname, that.firstname) && Objects.equals(lastname, that.lastname) && Objects.equals(key, that.key) && Objects.equals(createdAt, that.createdAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstname, lastname, key, createdAt);
+    }
 }

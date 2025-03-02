@@ -16,6 +16,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Builder
 @Getter
 @Setter
@@ -41,4 +43,16 @@ public class Token {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Token token1 = (Token) o;
+        return Objects.equals(token, token1.token) && typeToken == token1.typeToken;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(token, typeToken);
+    }
 }

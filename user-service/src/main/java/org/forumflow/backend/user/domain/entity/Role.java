@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Objects;
 
 @Builder
 @Getter
@@ -38,10 +39,22 @@ public class Role {
     )
     @Column(name = "role_id")
     private int id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, updatable = false)
     @Enumerated(value = EnumType.STRING)
     private TypeRole typeRole;
 
     @ManyToMany(mappedBy = "roles")
     private List<User> users;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Role role = (Role) o;
+        return typeRole == role.typeRole;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(typeRole);
+    }
 }

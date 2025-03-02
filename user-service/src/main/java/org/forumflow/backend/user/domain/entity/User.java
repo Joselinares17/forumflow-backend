@@ -16,6 +16,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,6 +29,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Builder
 @Getter
@@ -41,7 +43,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, updatable = false)
     private String username;
     @Column(nullable = false, unique = true)
     private String password;
@@ -139,5 +141,18 @@ public class User implements UserDetails {
     public boolean isCurrentlyBanned() {
         return this.banStart != null && this.banDuration != null
                 && this.banStart.plus(this.banDuration).isAfter(LocalDateTime.now());
+    }
+
+    //TODO: Revisar si está bien considerar a UserDetail
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(username, user.username) && Objects.equals(userDetail, user.userDetail);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, userDetail);
     }
 }
