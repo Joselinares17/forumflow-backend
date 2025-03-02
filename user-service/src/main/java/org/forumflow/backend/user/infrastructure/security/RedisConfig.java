@@ -1,7 +1,10 @@
 package org.forumflow.backend.user.infrastructure.security;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.forumflow.backend.user.domain.entity.User;
 import org.forumflow.backend.user.infrastructure.serialization.UserRedisMixin;
@@ -31,9 +34,16 @@ public class RedisConfig {
 
     @Bean("redisObjectMapper")
     public ObjectMapper redisObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
+
+        ObjectMapper objectMapper = JsonMapper.builder()
+                .addModule(new JavaTimeModule())
+                .configure(MapperFeature.AUTO_DETECT_GETTERS, true)
+                .configure(MapperFeature.AUTO_DETECT_FIELDS, true)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .build();
+
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         return objectMapper;
     }
 
@@ -44,6 +54,7 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         template.setDefaultSerializer(redisSerializer(redisObjectMapper));
+
         return template;
     }
 

@@ -13,15 +13,20 @@ import org.forumflow.backend.user.infrastructure.model.response.UserDetailRespon
 import org.forumflow.backend.user.infrastructure.model.response.UserResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserBusiness implements IUserService {
@@ -66,6 +71,7 @@ public class UserBusiness implements IUserService {
 
     //TODO: Reemplazar esta búsqueda por alternativas dinámicas y completas
     @Override
+    @Cacheable(value = "users", key="'user:' + #username + ':info'")
     @Transactional(readOnly = true)
     public UserResponse getUserInfoByUsername(String username) {
         User userSaved = userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new);
@@ -73,6 +79,7 @@ public class UserBusiness implements IUserService {
     }
 
     @Override
+    @CacheEvict(value = "users", key = "'user:page:' + #pageable.pageNumber + ':size' + #pageable.pageSize")
     @Transactional(readOnly = true)
     public Page<UserResponse> getAllUsersWithDetails(Pageable pageable) {
         return userRepository.findAllUsersWithDetails(PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()))
@@ -82,7 +89,9 @@ public class UserBusiness implements IUserService {
     @Override
     @Transactional
     public void deleteUser(User user) {
-        List<String> roles = user.getAuthorities().stream()
+        SecurityContext context = SecurityContextHolder.getContext();
+
+        List<String> roles = context.getAuthentication().getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
