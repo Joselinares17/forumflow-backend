@@ -1,7 +1,6 @@
 package org.forumflow.backend.user.application.service;
 
-import org.forumflow.backend.user.infraestructure.model.request.SuspendRequest;
-import org.forumflow.backend.user.infraestructure.model.response.ModerationResultResponse;
+import org.forumflow.backend.user.infrastructure.model.response.ModerationResultResponse;
 
 import java.time.Duration;
 

@@ -1,17 +1,16 @@
 package org.forumflow.backend.user.application.business;
 
 import org.forumflow.backend.user.application.service.IUserService;
-import org.forumflow.backend.user.domain.entity.TypeRole;
 import org.forumflow.backend.user.domain.entity.User;
 import org.forumflow.backend.user.domain.repository.TokenRepository;
 import org.forumflow.backend.user.domain.repository.UserRepository;
-import org.forumflow.backend.user.infraestructure.exception.custom.security.PermissionDeniedException;
-import org.forumflow.backend.user.infraestructure.exception.custom.user.UserNotFoundException;
-import org.forumflow.backend.user.infraestructure.model.mapper.UserMapper;
-import org.forumflow.backend.user.infraestructure.model.request.ChangePasswordRequest;
-import org.forumflow.backend.user.infraestructure.model.request.UpdateInfoRequest;
-import org.forumflow.backend.user.infraestructure.model.response.UserDetailResponse;
-import org.forumflow.backend.user.infraestructure.model.response.UserResponse;
+import org.forumflow.backend.user.infrastructure.exception.custom.security.PermissionDeniedException;
+import org.forumflow.backend.user.infrastructure.exception.custom.user.UserNotFoundException;
+import org.forumflow.backend.user.infrastructure.model.mapper.UserMapper;
+import org.forumflow.backend.user.infrastructure.model.request.ChangePasswordRequest;
+import org.forumflow.backend.user.infrastructure.model.request.UpdateInfoRequest;
+import org.forumflow.backend.user.infrastructure.model.response.UserDetailResponse;
+import org.forumflow.backend.user.infrastructure.model.response.UserResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 @Service
 public class UserBusiness implements IUserService {

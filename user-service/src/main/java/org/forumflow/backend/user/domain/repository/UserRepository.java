@@ -1,7 +1,7 @@
 package org.forumflow.backend.user.domain.repository;
 
 import org.forumflow.backend.user.domain.entity.User;
-import org.forumflow.backend.user.infraestructure.model.projection.UserProjection;
+import org.forumflow.backend.user.infrastructure.model.projection.UserProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
