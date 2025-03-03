@@ -10,9 +10,17 @@
         POSTGRES_DB: db_users
       volumes:
         - ./datos:/var/lib/postgresql/data
+      networks:
+        - forumflow-network
 
     redis:
       image: redis:7.4.2-alpine
       container_name: redis
       ports:
         - "6379:6379"
+      networks:
+        - forumflow-network
+
+  networks:
+    forumflow-network:
+      driver: bridge
