@@ -25,7 +25,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Entity
 @Table(name = "tokens")
-public class Token {
+public class Token extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "token_id")

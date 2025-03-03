@@ -26,7 +26,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Entity
 @Table(name = "roles")
-public class Role {
+public class Role extends Auditable {
     @Id
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,

@@ -24,7 +24,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Entity
 @Table(name = "user_details")
-public class UserDetail {
+public class UserDetail extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_detail_id")
