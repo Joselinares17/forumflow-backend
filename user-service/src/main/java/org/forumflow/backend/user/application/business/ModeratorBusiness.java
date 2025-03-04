@@ -1,5 +1,6 @@
 package org.forumflow.backend.user.application.business;
 
+import org.forumflow.backend.user.application.service.IAccountActions;
 import org.forumflow.backend.user.application.service.IModeratorService;
 import org.forumflow.backend.user.domain.entity.TypeRole;
 import org.forumflow.backend.user.domain.entity.User;
@@ -19,7 +20,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Service
-public class ModeratorBusiness implements IModeratorService {
+public class ModeratorBusiness implements IModeratorService, IAccountActions {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final TokenRepository tokenRepository;
@@ -76,7 +77,9 @@ public class ModeratorBusiness implements IModeratorService {
         return saveUserAndReturnResult(userDb, id, "Reactivate", null);
     }
 
-    private User getUserById(Long id) {
+    @Override
+    @Transactional(readOnly = true)
+    public User getUserById(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("Invalid user ID");
         }
@@ -89,7 +92,9 @@ public class ModeratorBusiness implements IModeratorService {
                 .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + id));
     }
 
-    private ModerationResultResponse saveUserAndReturnResult(User user, Long id, String action, Duration duration) {
+    @Override
+    @Transactional
+    public ModerationResultResponse saveUserAndReturnResult(User user, Long id, String action, Duration duration) {
         try {
             userRepository.save(user); // Guardamos el usuario en la base de datos
             log.info("User {} {} successfully", id, action);
@@ -107,7 +112,9 @@ public class ModeratorBusiness implements IModeratorService {
     }
 
     // Para suspensiones (locked)
-    private ModerationResultResponse handleSuspension(Long id, boolean suspend, Duration duration) {
+    @Override
+    @Transactional
+    public ModerationResultResponse handleSuspension(Long id, boolean suspend, Duration duration) {
         User userDb = getUserById(id);
 
         if (suspend && !userDb.isAccountNonLocked()) {
@@ -129,7 +136,8 @@ public class ModeratorBusiness implements IModeratorService {
     }
 
     // Para baneos (enabled)
-    private ModerationResultResponse handleBan(Long id, boolean ban, Duration duration) {
+    @Override
+    public ModerationResultResponse handleBan(Long id, boolean ban, Duration duration) {
         User userDb = getUserById(id);
 
         if (ban && !userDb.isEnabled()) {

@@ -2,7 +2,10 @@ package org.forumflow.backend.user.application.service;
 
 import org.forumflow.backend.user.infrastructure.helper.SearchCriteria;
 import org.forumflow.backend.user.infrastructure.model.response.AdminActionResponse;
+import org.forumflow.backend.user.infrastructure.model.response.AuditResponse;
 import org.forumflow.backend.user.infrastructure.model.response.ModerationResultResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface IAdministratorService {
     ModerationResultResponse suspendAccountPermanently(Long id);
@@ -17,8 +20,7 @@ public interface IAdministratorService {
 
     AdminActionResponse deleteUserAccount(Long userId);
 
-    //Auditoria
-//    Page<AuditLog> getAuditLogs(SearchCriteria criteria, Pageable pageable);
-//    List<AuditLog> getUserActivityLogs(Long userId);
-//    List<AuditLog> getModeratorActions(Long moderatorId);
+    Page<AuditResponse> getUserActivityLogs(Long userId);
+
+    Page<AuditResponse> getUserActivityByUsername(String username, Pageable pageable);
 }
